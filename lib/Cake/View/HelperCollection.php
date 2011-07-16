@@ -70,6 +70,11 @@ class HelperCollection extends ObjectCollection {
 		if (isset($this->_loaded[$alias])) {
 			return $this->_loaded[$alias];
 		}
+		
+		if (!empty($this->_View->theme)) {
+			App::build(array('View/Helper' => array(App::themePath($this->_View->theme) . 'Helper' . DS)));
+		}
+		
 		$helperClass = $name . 'Helper';
 		App::uses($helperClass, $plugin . 'View/Helper');
 		if (!class_exists($helperClass)) {
