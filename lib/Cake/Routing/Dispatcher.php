@@ -20,9 +20,6 @@
  * @license       MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-/**
- * List of helpers to include
- */
 App::uses('Router', 'Routing');
 App::uses('CakeRequest', 'Network');
 App::uses('CakeResponse', 'Network');
@@ -55,7 +52,7 @@ class Dispatcher {
  * Dispatches and invokes given Request, handing over control to the involved controller. If the controller is set
  * to autoRender, via Controller::$autoRender, then Dispatcher will render the view.
  *
- * Actions in CakePHP can be any public method on a controller, that is not declared in Controller.  If you
+ * Actions in CakePHP can be any public method on a controller, that is declared in Controller.  If you
  * want controller methods to be public and in-accesible by URL, then prefix them with a `_`.
  * For example `public function _loadPosts() { }` would not be accessible via URL.  Private and protected methods
  * are also not accessible via URL.
