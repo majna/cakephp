@@ -417,7 +417,7 @@ class DboSource extends DataSource {
  * @param string $sql SQL statement
  * @param array $params list of params to be bound to query
  * @param array $prepareOptions Options to be used in the prepare statement
- * @return mixed PDOStatement if query executes with no problem, true as the result of a succesfull, false on error
+ * @return mixed PDOStatement if query executes with no problem, true as the result of a successful, false on error
  * query returning no rows, suchs as a CREATE statement, false otherwise
  */
 	protected function _execute($sql, $params = array(), $prepareOptions = array()) {
@@ -460,7 +460,11 @@ class DboSource extends DataSource {
  * @return string Error message with error number
  */
 	public function lastError(PDOStatement $query = null) {
-		$error = $query->errorInfo();
+		if ($query) {
+			$error = $query->errorInfo();
+		} else {
+			$error = $this->_connection->errorInfo();
+		}
 		if (empty($error[2])) {
 			return null;
 		}
@@ -2443,7 +2447,7 @@ class DboSource extends DataSource {
 				break;
 			}
 			$value = "({$value})";
-		} elseif ($null) {
+		} elseif ($null || $value === 'NULL') {
 			switch ($operator) {
 				case '=':
 					$operator = 'IS';
