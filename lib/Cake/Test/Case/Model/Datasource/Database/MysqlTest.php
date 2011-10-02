@@ -65,7 +65,7 @@ class MysqlTest extends CakeTestCase {
 		}
 		$this->_debug = Configure::read('debug');
 		Configure::write('debug', 1);
-		$this->model = new MysqlTestModel();
+		$this->model = ClassRegistry::init('MysqlTestModel');
 	}
 
 /**
@@ -978,6 +978,7 @@ class MysqlTest extends CakeTestCase {
 			'offset' => array(),
 			'group' => array()
 		);
+		$queryData['joins'][0]['table'] = $this->Dbo->fullTableName($queryData['joins'][0]['table']);
 		$this->assertEqual($queryData, $expected);
 
 		$result = $this->Dbo->generateAssociationQuery($this->Model, $null, null, null, null, $queryData, false, $null);
