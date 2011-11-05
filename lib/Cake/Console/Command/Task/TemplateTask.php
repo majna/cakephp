@@ -132,14 +132,16 @@ class TemplateTask extends Shell {
  * @param array $vars Additional vars to set to template scope.
  * @return string contents of generated code template
  */
-	public function generate($directory, $filename, $vars = null) {
+	public function generate($directory, $filename, $vars = null, $themePath = null) {
 		if ($vars !== null) {
 			$this->set($vars);
 		}
 		if (empty($this->templatePaths)) {
 			$this->initialize();
 		}
-		$themePath = $this->getThemePath();
+		if (empty($themePath)) {
+			$themePath = $this->getThemePath();
+		}
 		$templateFile = $this->_findTemplate($themePath, $directory, $filename);
 		if ($templateFile) {
 			extract($this->templateVars);

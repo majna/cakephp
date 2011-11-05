@@ -373,7 +373,8 @@ class ViewTask extends BakeTask {
 		$this->Template->set('action', $action);
 		$this->Template->set('plugin', $this->plugin);
 		$this->Template->set($vars);
-		$template = $this->getTemplate($action);
+		$themePath = $this->Template->getThemePath();
+		$template = $this->getTemplate($action, $themePath);
 		if ($template) {
 			return $this->Template->generate('views', $template);
 		}
@@ -386,12 +387,15 @@ class ViewTask extends BakeTask {
  * @param string $action name
  * @return string template name
  */
-	public function getTemplate($action) {
+	public function getTemplate($action, $themePath = null) {
 		if ($action != $this->template && in_array($action, $this->noTemplateActions)) {
 			return false;
 		}
 		if (!empty($this->template) && $action != $this->template) {
 			return $this->template;
+		}
+		if ($themePath && file_exists($themePath . 'views' . DS . $action . '.ctp')) {
+			return $action;
 		}
 		$template = $action;
 		$prefixes = Configure::read('Routing.prefixes');
