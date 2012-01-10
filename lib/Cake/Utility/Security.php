@@ -34,26 +34,6 @@ class Security {
 	public static $hashType = null;
 
 /**
- * Get allowed minutes of inactivity based on security level.
- *
- * @return integer Allowed inactivity in minutes
- */
-	public static function inactiveMins() {
-		switch (Configure::read('Security.level')) {
-			case 'high':
-				return 10;
-			break;
-			case 'medium':
-				return 100;
-			break;
-			case 'low':
-			default:
-				return 300;
-				break;
-		}
-	}
-
-/**
  * Generate authorization hash.
  *
  * @return string Hash
