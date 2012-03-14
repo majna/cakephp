@@ -151,6 +151,7 @@ class ExceptionRenderer {
 		} catch (Exception $e) {
 			$controller = new Controller($request, $response);
 			$controller->viewPath = 'Errors';
+			$controller->layout = false;
 		}
 		return $controller;
 	}
