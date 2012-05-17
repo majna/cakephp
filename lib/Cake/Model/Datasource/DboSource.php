@@ -1108,6 +1108,7 @@ class DboSource extends DataSource {
 
 					if (isset($db) && method_exists($db, 'queryAssociation')) {
 						$stack = array($assoc);
+						$queryData['joined'] = Set::extract($queryData['joins'], '{n}.alias');
 						$db->queryAssociation($model, $linkModel, $type, $assoc, $assocData, $array, true, $resultSet, $model->recursive - 1, $stack);
 						unset($db);
 
@@ -1240,7 +1241,11 @@ class DboSource extends DataSource {
 				$q = $this->insertQueryData($query, null, $association, $assocData, $model, $linkModel, $stack);
 
 				if ($q !== false) {
-					$fetch = $this->fetchAll($q, $model->cacheQueries);
+					if ($type == 'belongsTo' && in_array($linkModel->alias, $queryData['joined'])) {
+						$fetch[][$linkModel->alias] = $row[$linkModel->alias];
+					} else {
+						$fetch = $this->fetchAll($q, $model->cacheQueries);
+					}
 				} else {
 					$fetch = null;
 				}
