@@ -1092,6 +1092,7 @@ class DboSource extends DataSource {
 		}
 
 		if ($model->recursive > -1) {
+			$array['joined'] = (array)Set::extract($queryData['joins'], '{n}.alias');
 			foreach ($_associations as $type) {
 				foreach ($model->{$type} as $assoc => $assocData) {
 					$linkModel = $model->{$assoc};
@@ -1248,11 +1249,16 @@ class DboSource extends DataSource {
 
 			$modelAlias = $model->alias;
 			$modelPK = $model->primaryKey;
+			static $recursiveSelfJoin = false;
 			foreach ($resultSet as &$row) {
 				if ($type !== 'hasAndBelongsToMany') {
 					$q = $this->insertQueryData($query, $row, $association, $assocData, $model, $linkModel, $stack);
 					if ($q !== false) {
-						$fetch = $this->fetchAll($q, $model->cacheQueries);
+						if (!$recursiveSelfJoin && ($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $queryData['joined']) && isset($row[$linkModel->alias])) {	
+							$fetch[0][$linkModel->alias] = $row[$linkModel->alias];
+						} else {
+							$fetch = $this->fetchAll($q, $model->cacheQueries);
+						}
 					} else {
 						$fetch = null;
 					}
@@ -1272,6 +1278,10 @@ class DboSource extends DataSource {
 										$db = $this;
 									} else {
 										$db = ConnectionManager::getDataSource($deepModel->useDbConfig);
+									}
+									list($plugin, $className) = pluginSplit($assocData1['className']);
+									if (($type1 === 'belongsTo' || $type1 === 'hasOne') && $className !== $deepModel->alias) {
+										$recursiveSelfJoin = true;
 									}
 									$db->queryAssociation($linkModel, $deepModel, $type1, $assoc1, $assocData1, $queryData, true, $fetch, $recursive - 1, $tmpStack);
 								}
