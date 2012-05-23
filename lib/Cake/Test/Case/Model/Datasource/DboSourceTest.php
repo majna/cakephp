@@ -768,6 +768,49 @@ class DboSourceTest extends CakeTestCase {
 	}
 
 /**
+ * test that queryAssociation() reuse already joined data for 'belongsTo' and 'hasOne' associations
+ * instead of running unneeded queries for each record
+ *
+ * @return void
+ */
+	public function testQueryAssociationUnneededQueries() {
+		$this->loadFixtures('Article', 'User', 'Comment', 'Attachment');
+		$Comment = new Comment;
+
+		$fullDebug = $this->db->fullDebug;
+		$this->db->fullDebug = true;
+		$this->db->getLog(); // clear log
+
+		// Case: Comment  belongsTo User, Attachment and Article
+		$Comment->Attachment->unbindModel(array(
+			'belongsTo' => array('Comment')
+		));
+		$Comment->Article->unbindModel(array(
+			'belongsTo' => array('User'),
+			'hasMany' => array('Comment'),
+			'hasAndBelongsToMany' => array('Tag')
+		));
+		$Comment->find('all', array('recursive' => 2));
+		$log = $this->db->getLog();
+		$this->assertEquals(1, count($log['log']));
+
+		// Case: Comment  belongsTo Article, Article belongsTo User
+		$Comment->unbindModel(array(
+			'belongsTo' => array('User'),
+			'hasOne' => array('Attachment')
+		));
+		$Comment->Article->unbindModel(array(
+			'hasMany' => array('Comment'),
+			'hasAndBelongsToMany' => array('Tag'),
+		));
+		$Comment->find('all', array('recursive' => 2));
+		$log = $this->db->getLog();
+		$this->assertEquals(7, count($log['log']));
+
+		$this->db->fullDebug = $fullDebug;
+	}
+
+/**
  * test that fields() is using methodCache()
  *
  * @return void
