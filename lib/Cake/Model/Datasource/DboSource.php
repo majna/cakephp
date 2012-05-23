@@ -1121,6 +1121,7 @@ class DboSource extends DataSource {
 			if ($queryData['callbacks'] === true || $queryData['callbacks'] === 'after') {
 				$this->_filterResults($resultSet, $model, $filtered);
 			}
+			unset($queryData['joined']);
 		}
 
 		if (!is_null($recursive)) {
@@ -1249,13 +1250,12 @@ class DboSource extends DataSource {
 
 			$modelAlias = $model->alias;
 			$modelPK = $model->primaryKey;
-			static $recursiveSelfJoin = false;
 			foreach ($resultSet as &$row) {
 				if ($type !== 'hasAndBelongsToMany') {
 					$q = $this->insertQueryData($query, $row, $association, $assocData, $model, $linkModel, $stack);
 					if ($q !== false) {
-						if (!$recursiveSelfJoin && ($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $queryData['joined']) && isset($row[$linkModel->alias])) {	
-							$fetch[0] = array($linkModel->alias =>$row[$linkModel->alias]);
+						if (!isset($queryData['recursiveSelfJoin']) && ($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $queryData['joined']) && isset($row[$linkModel->alias])) {	
+							$fetch[0] = array($linkModel->alias => $row[$linkModel->alias]);
 						} else {
 							$fetch = $this->fetchAll($q, $model->cacheQueries);
 						}
@@ -1281,7 +1281,7 @@ class DboSource extends DataSource {
 									}
 									list($plugin, $className) = pluginSplit($assocData1['className']);
 									if (($type1 === 'belongsTo' || $type1 === 'hasOne') && $className !== $deepModel->alias) {
-										$recursiveSelfJoin = true;
+										$queryData['recursiveSelfJoin'] = true;
 									}
 									$db->queryAssociation($linkModel, $deepModel, $type1, $assoc1, $assocData1, $queryData, true, $fetch, $recursive - 1, $tmpStack);
 								}
@@ -1314,6 +1314,7 @@ class DboSource extends DataSource {
 					$tempArray[0][$association] = false;
 					$this->_mergeAssociation($row, $tempArray, $association, $type, $selfJoin);
 				}
+				unset($queryData['recursiveSelfJoin']);
 			}
 		}
 	}
