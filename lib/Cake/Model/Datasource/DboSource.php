@@ -1255,7 +1255,7 @@ class DboSource extends DataSource {
 					$q = $this->insertQueryData($query, $row, $association, $assocData, $model, $linkModel, $stack);
 					if ($q !== false) {
 						if (!$recursiveSelfJoin && ($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $queryData['joined']) && isset($row[$linkModel->alias])) {	
-							$fetch[0][$linkModel->alias] = $row[$linkModel->alias];
+							$fetch[0] = array($linkModel->alias =>$row[$linkModel->alias]);
 						} else {
 							$fetch = $this->fetchAll($q, $model->cacheQueries);
 						}
