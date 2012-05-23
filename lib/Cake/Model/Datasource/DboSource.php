@@ -1092,6 +1092,7 @@ class DboSource extends DataSource {
 		}
 
 		if ($model->recursive > -1) {
+			$array['joined'] = (array)Set::extract($queryData['joins'], '{n}.alias');
 			foreach ($_associations as $type) {
 				foreach ($model->{$type} as $assoc => $assocData) {
 					$linkModel = $model->{$assoc};
@@ -1120,6 +1121,7 @@ class DboSource extends DataSource {
 			if ($queryData['callbacks'] === true || $queryData['callbacks'] === 'after') {
 				$this->_filterResults($resultSet, $model, $filtered);
 			}
+			unset($queryData['joined']);
 		}
 
 		if (!is_null($recursive)) {
@@ -1252,7 +1254,11 @@ class DboSource extends DataSource {
 				if ($type !== 'hasAndBelongsToMany') {
 					$q = $this->insertQueryData($query, $row, $association, $assocData, $model, $linkModel, $stack);
 					if ($q !== false) {
-						$fetch = $this->fetchAll($q, $model->cacheQueries);
+						if (!isset($queryData['recursiveSelfJoin']) && ($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $queryData['joined']) && isset($row[$linkModel->alias])) {	
+							$fetch[0] = array($linkModel->alias => $row[$linkModel->alias]);
+						} else {
+							$fetch = $this->fetchAll($q, $model->cacheQueries);
+						}
 					} else {
 						$fetch = null;
 					}
@@ -1272,6 +1278,10 @@ class DboSource extends DataSource {
 										$db = $this;
 									} else {
 										$db = ConnectionManager::getDataSource($deepModel->useDbConfig);
+									}
+									list($plugin, $className) = pluginSplit($assocData1['className']);
+									if (($type1 === 'belongsTo' || $type1 === 'hasOne') && $className !== $deepModel->alias) {
+										$queryData['recursiveSelfJoin'] = true;
 									}
 									$db->queryAssociation($linkModel, $deepModel, $type1, $assoc1, $assocData1, $queryData, true, $fetch, $recursive - 1, $tmpStack);
 								}
@@ -1304,6 +1314,7 @@ class DboSource extends DataSource {
 					$tempArray[0][$association] = false;
 					$this->_mergeAssociation($row, $tempArray, $association, $type, $selfJoin);
 				}
+				unset($queryData['recursiveSelfJoin']);
 			}
 		}
 	}
