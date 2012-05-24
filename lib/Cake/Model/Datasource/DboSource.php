@@ -1080,6 +1080,7 @@ class DboSource extends DataSource {
 		$query = trim($this->generateAssociationQuery($model, null, null, null, null, $queryData, false, $null));
 
 		$resultSet = $this->fetchAll($query, $model->cacheQueries);
+
 		if ($resultSet === false) {
 			$model->onError();
 			return false;
@@ -1092,7 +1093,7 @@ class DboSource extends DataSource {
 		}
 
 		if ($model->recursive > -1) {
-			$array['joined'] = (array)Set::extract($queryData['joins'], '{n}.alias');
+			$joined = (array)Set::extract($queryData['joins'], '{n}.alias');
 			foreach ($_associations as $type) {
 				foreach ($model->{$type} as $assoc => $assocData) {
 					$linkModel = $model->{$assoc};
@@ -1109,6 +1110,10 @@ class DboSource extends DataSource {
 
 					if (isset($db) && method_exists($db, 'queryAssociation')) {
 						$stack = array($assoc);
+
+						if (($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $joined)) {
+							$array['joined'] = array($type=>array($model->alias => $linkModel->alias));
+						}
 						$db->queryAssociation($model, $linkModel, $type, $assoc, $assocData, $array, true, $resultSet, $model->recursive - 1, $stack);
 						unset($db);
 
@@ -1178,6 +1183,11 @@ class DboSource extends DataSource {
  * @throws CakeException when results cannot be created.
  */
 	public function queryAssociation(Model $model, &$linkModel, $type, $association, $assocData, &$queryData, $external, &$resultSet, $recursive, $stack) {
+		if (isset($queryData['joined'] )) {
+			$joined = $queryData['joined'];
+			unset($queryData['joined']);
+		}
+
 		if ($query = $this->generateAssociationQuery($model, $linkModel, $type, $association, $assocData, $queryData, $external, $resultSet)) {
 			if (!is_array($resultSet)) {
 				throw new CakeException(__d('cake_dev', 'Error in Model %s', get_class($model)));
@@ -1254,7 +1264,14 @@ class DboSource extends DataSource {
 				if ($type !== 'hasAndBelongsToMany') {
 					$q = $this->insertQueryData($query, $row, $association, $assocData, $model, $linkModel, $stack);
 					if ($q !== false) {
-						if ((!isset($queryData['recursiveSelfJoin']) || !$queryData['recursiveSelfJoin']) && ($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $queryData['joined']) && isset($row[$linkModel->alias])) {	
+						$reuseJoins = false;
+						if (isset($row[$linkModel->alias]) && isset($joined[$type][$model->alias][$linkModel->alias])) {
+							$filtered = Hash::filter($row[$linkModel->alias]);
+							if (!empty($filtered)) {
+								$reuseJoins = true;
+							}
+						}
+						if ($reuseJoins) {	
 							$fetch[0] = array($linkModel->alias => $row[$linkModel->alias]);
 						} else {
 							$fetch = $this->fetchAll($q, $model->cacheQueries);
@@ -1278,13 +1295,6 @@ class DboSource extends DataSource {
 										$db = $this;
 									} else {
 										$db = ConnectionManager::getDataSource($deepModel->useDbConfig);
-									}
-									list($plugin, $className) = pluginSplit($assocData1['className']);
-									if (($type1 === 'belongsTo' || $type1 === 'hasOne') && $className !== $deepModel->alias) {
-										$recursiveSelfJoin = true;
-										$queryData['recursiveSelfJoin'] = true;
-									}  else {
-										$queryData['recursiveSelfJoin'] = false;
 									}
 									$db->queryAssociation($linkModel, $deepModel, $type1, $assoc1, $assocData1, $queryData, true, $fetch, $recursive - 1, $tmpStack);
 								}
@@ -1316,10 +1326,6 @@ class DboSource extends DataSource {
 				} else {
 					$tempArray[0][$association] = false;
 					$this->_mergeAssociation($row, $tempArray, $association, $type, $selfJoin);
-				}
-				
-				if (isset($queryData['recursiveSelfJoin'])) {
-					#unset($queryData['recursiveSelfJoin']);
 				}
 			}
 		}
