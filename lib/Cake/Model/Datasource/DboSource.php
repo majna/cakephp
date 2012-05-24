@@ -1110,7 +1110,6 @@ class DboSource extends DataSource {
 
 					if (isset($db) && method_exists($db, 'queryAssociation')) {
 						$stack = array($assoc);
-
 						if (($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $joined)) {
 							$array['joined'] = array($type=>array($model->alias => $linkModel->alias));
 						}
