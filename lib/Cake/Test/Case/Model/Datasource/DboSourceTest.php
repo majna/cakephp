@@ -779,9 +779,11 @@ class DboSourceTest extends CakeTestCase {
 
 		$fullDebug = $this->db->fullDebug;
 		$this->db->fullDebug = true;
+
+		$Comment->find('all', array('recursive' => 2)); // ensure 'DESCRIBE' queries are fired
 		$this->db->getLog(); // clear log
 
-		// Case: Comment  belongsTo User, Attachment and Article
+		// case: Comment  belongsTo User, Attachment and Article
 		$Comment->Attachment->unbindModel(array(
 			'belongsTo' => array('Comment')
 		));
@@ -794,7 +796,7 @@ class DboSourceTest extends CakeTestCase {
 		$log = $this->db->getLog();
 		$this->assertEquals(1, count($log['log']));
 
-		// Case: Comment  belongsTo Article, Article belongsTo User
+		// case: Comment  belongsTo Article, Article belongsTo User
 		$Comment->unbindModel(array(
 			'belongsTo' => array('User'),
 			'hasOne' => array('Attachment')
