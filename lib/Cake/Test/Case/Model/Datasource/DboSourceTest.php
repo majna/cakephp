@@ -794,8 +794,7 @@ class DboSourceTest extends CakeTestCase {
 		));
 		$Comment->find('all', array('recursive' => 2));
 		$log = $this->db->getLog();
-		debug($log);
-		//$this->assertEquals(1, count($log['log']));
+		$this->assertEquals(1, count($log['log']));
 
 		// case: Comment  belongsTo Article, Article belongsTo User
 		$Comment->unbindModel(array(
@@ -808,7 +807,7 @@ class DboSourceTest extends CakeTestCase {
 		));
 		$Comment->find('all', array('recursive' => 2));
 		$log = $this->db->getLog();
-		//$this->assertEquals(7, count($log['log']));
+		$this->assertEquals(7, count($log['log']));
 
 		// case: Comment hasOne Attachment
 		$Comment->unbindModel(array(
@@ -819,7 +818,7 @@ class DboSourceTest extends CakeTestCase {
 		));
 		$Comment->find('all', array('recursive' => 2));
 		$log = $this->db->getLog();
-		//$this->assertEquals(6, count($log['log']));
+		$this->assertEquals(1, count($log['log']));
 
 		$this->db->fullDebug = $fullDebug;
 	}
