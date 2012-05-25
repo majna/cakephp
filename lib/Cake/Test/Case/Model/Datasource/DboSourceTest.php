@@ -818,7 +818,7 @@ class DboSourceTest extends CakeTestCase {
 		));
 		$Comment->find('all', array('recursive' => 2));
 		$log = $this->db->getLog();
-		$this->assertEquals(1, count($log['log']));
+		$this->assertEquals(6, count($log['log']));
 
 		$this->db->fullDebug = $fullDebug;
 	}
