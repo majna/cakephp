@@ -1093,7 +1093,10 @@ class DboSource extends DataSource {
 		}
 
 		if ($model->recursive > -1) {
-			$joined = (array)Set::extract($queryData['joins'], '{n}.alias');
+			$joined = array();
+			if (isset($queryData['joins'][0]['alias'])) {
+				$joined[$model->alias] = (array)Set::extract($queryData['joins'], '{n}.alias');
+			}
 			foreach ($_associations as $type) {
 				foreach ($model->{$type} as $assoc => $assocData) {
 					$linkModel = $model->{$assoc};
@@ -1110,9 +1113,7 @@ class DboSource extends DataSource {
 
 					if (isset($db) && method_exists($db, 'queryAssociation')) {
 						$stack = array($assoc);
-						if (($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $joined)) {
-							$stack['joined'] = array($type=>array($model->alias => $linkModel->alias));
-						}
+						$stack['joined'] = $joined;
 						$db->queryAssociation($model, $linkModel, $type, $assoc, $assocData, $array, true, $resultSet, $model->recursive - 1, $stack);
 						unset($db);
 
@@ -1125,7 +1126,6 @@ class DboSource extends DataSource {
 			if ($queryData['callbacks'] === true || $queryData['callbacks'] === 'after') {
 				$this->_filterResults($resultSet, $model, $filtered);
 			}
-			unset($queryData['joined']);
 		}
 
 		if (!is_null($recursive)) {
@@ -1264,13 +1264,14 @@ class DboSource extends DataSource {
 					$q = $this->insertQueryData($query, $row, $association, $assocData, $model, $linkModel, $stack);
 					if ($q !== false) {
 						$reuseJoins = false;
-						if (isset($row[$linkModel->alias]) && isset($joined[$type][$model->alias][$linkModel->alias])) {
+						if (($type === 'belongsTo' || $type === 'hasOne') && isset($row[$linkModel->alias], $joined[$model->alias]) && in_array($linkModel->alias, $joined[$model->alias])) {
 							$reuseData = $row[$linkModel->alias];
 							$reuseData = Hash::filter($reuseData);
 							if (!empty($reuseData)) {
 								$reuseJoins = true;
 							}
 						}
+
 						if ($reuseJoins) {	
 							$fetch[0] = array($linkModel->alias => $row[$linkModel->alias]);
 						} else {

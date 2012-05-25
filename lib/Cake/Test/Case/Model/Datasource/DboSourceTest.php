@@ -774,7 +774,7 @@ class DboSourceTest extends CakeTestCase {
  * @return void
  */
 	public function testQueryAssociationUnneededQueries() {
-		$this->loadFixtures('Article', 'User', 'Comment', 'Attachment');
+		$this->loadFixtures('Article', 'User', 'Comment', 'Attachment', 'Tag', 'ArticlesTag');
 		$Comment = new Comment;
 
 		$fullDebug = $this->db->fullDebug;
