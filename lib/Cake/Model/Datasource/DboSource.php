@@ -1111,7 +1111,7 @@ class DboSource extends DataSource {
 					if (isset($db) && method_exists($db, 'queryAssociation')) {
 						$stack = array($assoc);
 						if (($type === 'belongsTo' || $type === 'hasOne') && in_array($linkModel->alias, $joined)) {
-							$array['joined'] = array($type=>array($model->alias => $linkModel->alias));
+							$stack['joined'] = array($type=>array($model->alias => $linkModel->alias));
 						}
 						$db->queryAssociation($model, $linkModel, $type, $assoc, $assocData, $array, true, $resultSet, $model->recursive - 1, $stack);
 						unset($db);
@@ -1182,9 +1182,9 @@ class DboSource extends DataSource {
  * @throws CakeException when results cannot be created.
  */
 	public function queryAssociation(Model $model, &$linkModel, $type, $association, $assocData, &$queryData, $external, &$resultSet, $recursive, $stack) {
-		if (isset($queryData['joined'] )) {
-			$joined = $queryData['joined'];
-			unset($queryData['joined']);
+		if (isset($stack['joined'] )) {
+			$joined = $stack['joined'];
+			unset($stack['joined']);
 		}
 
 		if ($query = $this->generateAssociationQuery($model, $linkModel, $type, $association, $assocData, $queryData, $external, $resultSet)) {
