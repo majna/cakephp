@@ -1265,8 +1265,7 @@ class DboSource extends DataSource {
 					if ($q !== false) {
 						$reuseJoins = false;
 						if (($type === 'belongsTo' || $type === 'hasOne') && isset($row[$linkModel->alias], $joined[$model->alias]) && in_array($linkModel->alias, $joined[$model->alias])) {
-							$reuseData = $row[$linkModel->alias];
-							$reuseData = Hash::filter($reuseData);
+							$reuseData = Hash::filter($row[$linkModel->alias]);
 							if (!empty($reuseData)) {
 								$reuseJoins = true;
 							}
