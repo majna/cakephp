@@ -1095,7 +1095,7 @@ class DboSource extends DataSource {
 		if ($model->recursive > -1) {
 			$joined = array();
 			if (isset($queryData['joins'][0]['alias'])) {
-				$joined[$model->alias] = (array)Set::extract($queryData['joins'], '{n}.alias');
+				$joined[$model->alias] = (array)Hash::extract($queryData['joins'], '{n}.alias');
 			}
 			foreach ($_associations as $type) {
 				foreach ($model->{$type} as $assoc => $assocData) {
@@ -1266,7 +1266,7 @@ class DboSource extends DataSource {
 					if ($q !== false) {
 						$reuseData = array();
 						if (($type === 'belongsTo' || $type === 'hasOne') && isset($row[$linkModel->alias], $joined[$model->alias]) && in_array($linkModel->alias, $joined[$model->alias])) {
-							$reuseData = Set::filter($row[$linkModel->alias]);
+							$reuseData = Hash::filter($row[$linkModel->alias]);
 							if (!empty($reuseData)) {
 								$fetch[0] = array($linkModel->alias => $row[$linkModel->alias]);
 							}
