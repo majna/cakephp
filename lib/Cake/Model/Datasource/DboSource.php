@@ -1182,7 +1182,7 @@ class DboSource extends DataSource {
  * @throws CakeException when results cannot be created.
  */
 	public function queryAssociation(Model $model, &$linkModel, $type, $association, $assocData, &$queryData, $external, &$resultSet, $recursive, $stack) {
-		if (isset($stack['joined'] )) {
+		if (isset($stack['joined'])) {
 			$joined = $stack['joined'];
 			unset($stack['joined']);
 		}
