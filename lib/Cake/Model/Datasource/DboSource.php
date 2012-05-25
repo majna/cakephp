@@ -1262,22 +1262,17 @@ class DboSource extends DataSource {
 			foreach ($resultSet as &$row) {
 				if ($type !== 'hasAndBelongsToMany') {
 					$q = $this->insertQueryData($query, $row, $association, $assocData, $model, $linkModel, $stack);
+					$fetch = null;
 					if ($q !== false) {
-						$reuseJoins = false;
+						$reuseData = array();
 						if (($type === 'belongsTo' || $type === 'hasOne') && isset($row[$linkModel->alias], $joined[$model->alias]) && in_array($linkModel->alias, $joined[$model->alias])) {
-							$reuseData = Hash::filter($row[$linkModel->alias]);
+							$reuseData = Set::filter($row[$linkModel->alias]);
 							if (!empty($reuseData)) {
-								$reuseJoins = true;
+								$fetch[0] = array($linkModel->alias => $row[$linkModel->alias]);
 							}
-						}
-
-						if ($reuseJoins) {	
-							$fetch[0] = array($linkModel->alias => $row[$linkModel->alias]);
 						} else {
 							$fetch = $this->fetchAll($q, $model->cacheQueries);
 						}
-					} else {
-						$fetch = null;
 					}
 				}
 				$selfJoin = $linkModel->name === $model->name;
