@@ -1080,7 +1080,6 @@ class DboSource extends DataSource {
 		$query = trim($this->generateAssociationQuery($model, null, null, null, null, $queryData, false, $null));
 
 		$resultSet = $this->fetchAll($query, $model->cacheQueries);
-
 		if ($resultSet === false) {
 			$model->onError();
 			return false;
