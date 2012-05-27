@@ -779,9 +779,11 @@ class DboSourceTest extends CakeTestCase {
 
 		$fullDebug = $this->db->fullDebug;
 		$this->db->fullDebug = true;
+		
+		// ensure Model descriptions are cached
 		Cache::clear(false, '_cake_model_');
 		$Comment->find('all', array('recursive' => 2)); 
-		$this->db->getLog(); // clear log
+		$this->db->getLog();
 
 		// case: Comment  belongsTo User and Article
 		$Comment->unbindModel(array(
