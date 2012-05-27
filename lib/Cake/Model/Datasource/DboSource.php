@@ -1264,10 +1264,10 @@ class DboSource extends DataSource {
 					$q = $this->insertQueryData($query, $row, $association, $assocData, $model, $linkModel, $stack);
 					$fetch = null;
 					if ($q !== false) {
-						$reuseData = array();
+						$joinedData = array();
 						if (($type === 'belongsTo' || $type === 'hasOne') && isset($row[$linkModel->alias], $joined[$model->alias]) && in_array($linkModel->alias, $joined[$model->alias])) {
-							$reuseData = Hash::filter($row[$linkModel->alias]);
-							if (!empty($reuseData)) {
+							$joinedData = Hash::filter($row[$linkModel->alias]);
+							if (!empty($joinedData)) {
 								$fetch[0] = array($linkModel->alias => $row[$linkModel->alias]);
 							}
 						} else {
