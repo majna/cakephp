@@ -30,10 +30,11 @@ before_script:
     console.log('TCP server listening on port 80 at localhost.');" > app/tmp/socket.js
   - mkdir ~/nodejs && cd $_
   - wget -N http://nodejs.org/dist/node-latest.tar.gz
-  - tar xzvf node-latest.tar.gz && cd `ls -rd node-v*`
+  - tar xzvf node-latest.tar.gz && cd node-v0.8.20
   - sudo ./configure
-  - sudo make install
+  - sudo make install -s
   - sudo node -v
+  - cd ..
   - sudo node ./app/tmp/socket.js &
   - pear channel-discover pear.cakephp.org
   - pear install --alldeps cakephp/CakePHP_CodeSniffer
