@@ -2,19 +2,19 @@ language: php
 
 php:
   - 5.2
-  - 5.3
-  - 5.4
+#  - 5.3
+#  - 5.4
 
 env:
-  - DB=mysql
-  - DB=pgsql
+#  - DB=mysql
+#  - DB=pgsql
   - DB=sqlite
 
 matrix:
   include:
     - php: 5.4
       env:
-        - PHPCS=1
+        - PHPCS=0
 
 before_script:
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e 'CREATE DATABASE cakephp_test;'; fi"
@@ -24,13 +24,13 @@ before_script:
   - sh -c "if [ '$DB' = 'pgsql' ]; then psql -c 'CREATE SCHEMA test2;' -U postgres -d cakephp_test; fi"
   - sh -c "if [ '$DB' = 'pgsql' ]; then psql -c 'CREATE SCHEMA test3;' -U postgres -d cakephp_test; fi"
   - chmod -R 777 ./app/tmp
-  - echo "var http = require('http');
-    http.createServer(function (req, res) {
-    res.writeHead(200);
-    res.end('Hello World');
-    }).listen(80, '127.0.0.1');
-    console.log('Server running at http://127.0.0.1:80/');" > app/tmp/socket.js
+  - echo "var net = require('net');
+    var server = net.createServer();
+    server.listen(80, 'localhost');
+    console.log('TCP server listening on port 80 at localhost.');" > app/tmp/socket.js
   - sudo node ./app/tmp/socket.js &
+  - whereis node
+  - echo $PATH
   - pear channel-discover pear.cakephp.org
   - pear install --alldeps cakephp/CakePHP_CodeSniffer
   - phpenv rehash
