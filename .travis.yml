@@ -28,11 +28,12 @@ before_script:
     var server = net.createServer();
     server.listen(80, 'localhost');
     console.log('TCP server listening on port 80 at localhost.');" > app/tmp/socket.js
-  - sudo add-apt-repository ppa:chris-lea/node.js
-  - sudo apt-get update
-  - sudo apt-get install nodejs
+  - mkdir ~/nodejs && cd $_
+  - wget -N http://nodejs.org/dist/node-latest.tar.gz
+  - tar xzvf node-latest.tar.gz && cd `ls -rd node-v*`
+  - sudo ./configure
+  - sudo make install
   - sudo node -v
-  - sudo which node
   - sudo node ./app/tmp/socket.js &
   - pear channel-discover pear.cakephp.org
   - pear install --alldeps cakephp/CakePHP_CodeSniffer
