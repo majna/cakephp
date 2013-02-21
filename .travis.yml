@@ -28,9 +28,7 @@ before_script:
     var server = net.createServer();
     server.listen(80, 'localhost');
     console.log('TCP server listening on port 80 at localhost.');" > app/tmp/socket.js
-  - sudo node ./app/tmp/socket.js &
-  - whereis node
-  - echo $PATH
+  - sudo /usr/local/bin/node ./app/tmp/socket.js &
   - pear channel-discover pear.cakephp.org
   - pear install --alldeps cakephp/CakePHP_CodeSniffer
   - phpenv rehash
